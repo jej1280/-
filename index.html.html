@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>달 모양 번호 확인</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:linear-gradient(135deg,#111827,#334155);
+font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;display:flex;align-items:center;justify-content:center;padding:20px}
+.app{width:min(620px,100%);background:white;border-radius:24px;padding:30px;box-shadow:0 20px 60px #0005}
+h1{text-align:center;margin:0 0 8px;font-size:28px}.sub{text-align:center;color:#667085;margin:0 0 24px}
+.search{display:flex;gap:10px}input{flex:1;min-width:0;font-size:24px;padding:14px;border:2px solid #d0d5dd;border-radius:14px;text-align:center;outline:none}
+input:focus{border-color:#667eea}button{border:0;border-radius:14px;padding:0 24px;background:#344054;color:#fff;font-size:18px;font-weight:bold;cursor:pointer}
+.result{margin-top:22px;border-radius:18px;padding:24px;text-align:center;min-height:150px;display:flex;flex-direction:column;justify-content:center}
+.empty{background:#f2f4f7;color:#667085}.super{background:#fee2e2;color:#991b1b}.full{background:#ffedd5;color:#9a3412}.half{background:#dcfce7;color:#166534}.new{background:#dbeafe;color:#1e40af}
+.emoji{font-size:54px;line-height:1;margin-bottom:10px}.name{font-size:30px;font-weight:800}.desc{margin-top:8px;font-size:15px}
+.legend{margin-top:24px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.legend div{padding:12px 5px;border-radius:12px;text-align:center;font-weight:700;font-size:14px}
+.ls{background:#fee2e2;color:#991b1b}.lf{background:#ffedd5;color:#9a3412}.lh{background:#dcfce7;color:#166534}.ln{background:#dbeafe;color:#1e40af}
+.counts{margin-top:18px;color:#667085;font-size:13px;text-align:center}
+.notice{margin-top:16px;background:#fff7ed;color:#9a3412;padding:10px 12px;border-radius:10px;font-size:12px;line-height:1.5}
+@media(max-width:500px){.app{padding:20px}.search{flex-direction:column}.search button{height:52px}.legend{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>🌙 달 모양 번호 확인</h1>
+<p class="sub">1~520번 중 번호를 입력하면 해당 달 모양을 바로 확인해요.</p>
+<div class="search">
+<input id="num" type="number" min="1" max="520" placeholder="번호 입력" autofocus>
+<button onclick="check()">확인</button>
+</div>
+<div id="result" class="result empty">
+<div class="emoji">🌙</div><div class="name">번호를 입력해주세요</div><div class="desc">1부터 520까지 입력할 수 있어요.</div>
+</div>
+<div class="legend">
+<div class="ls">🔴 슈퍼문</div><div class="lf">🟠 보름달</div><div class="lh">🟢 반달</div><div class="ln">🔵 초승달</div>
+</div>
+<div class="counts">슈퍼문 16개 · 보름달 36개 · 반달 126개 · 초승달 342개</div>
+<div class="notice">※ 입력해주신 반달 번호 목록은 130개가 아니라 실제 126개입니다. 앱은 적어주신 번호를 그대로 기준으로 판정합니다.</div>
+</div>
+<script>
+const supermoon=new Set([17, 39, 64, 87, 113, 142, 176, 198, 221, 257, 289, 314, 347, 391, 448, 503]);
+const fullmoon=new Set([5, 24, 31, 52, 71, 96, 108, 126, 151, 167, 183, 205, 216, 239, 251, 267, 278, 295, 307, 326, 339, 354, 363, 374, 385, 402, 411, 423, 437, 455, 466, 478, 489, 497, 509, 516]);
+const halfmoon=new Set([2, 8, 13, 19, 27, 34, 42, 47, 55, 61, 69, 76, 82, 91, 99, 105, 117, 123, 130, 136, 144, 149, 157, 162, 171, 179, 186, 192, 201, 209, 214, 224, 231, 236, 243, 248, 255, 262, 270, 275, 282, 287, 293, 301, 309, 318, 323, 331, 336, 343, 349, 357, 365, 371, 379, 388, 394, 399, 405, 414, 419, 427, 432, 440, 445, 452, 459, 464, 471, 476, 483, 486, 492, 501, 507, 512, 518, 4, 11, 22, 36, 45, 58, 66, 73, 84, 94, 102, 119, 128, 138, 147, 155, 164, 174, 181, 190, 203, 212, 226, 234, 242, 253, 265, 273, 280, 291, 299, 316, 329, 341, 351, 361, 377, 397, 408, 421, 434, 443, 457, 469, 481, 494, 504, 514, 520]);
+function check(){
+ const n=Number(document.getElementById("num").value), r=document.getElementById("result");
+ if(!Number.isInteger(n)||n<1||n>520){
+  r.className="result empty";r.innerHTML='<div class="emoji">⚠️</div><div class="name">1~520 사이의 번호를 입력해주세요</div>';return;
+ }
+ let name,emoji,cls,desc;
+ if(supermoon.has(n)){name="슈퍼문";emoji="🌕";cls="super";desc="🔴 슈퍼문 번호입니다."}
+ else if(fullmoon.has(n)){name="보름달";emoji="🌕";cls="full";desc="🟠 보름달 번호입니다."}
+ else if(halfmoon.has(n)){name="반달";emoji="🌓";cls="half";desc="🟢 반달 번호입니다."}
+ else{name="초승달";emoji="🌙";cls="new";desc="🔵 초승달 번호입니다."}
+ r.className="result "+cls;
+ r.innerHTML='<div class="emoji">'+emoji+'</div><div class="name">'+n+'번 → '+name+'</div><div class="desc">'+desc+'</div>';
+}
+document.getElementById("num").addEventListener("keydown",e=>{if(e.key==="Enter")check()});
+</script>
+</body>
+</html>
